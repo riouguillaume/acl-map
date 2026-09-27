@@ -18,7 +18,7 @@ public class MiscTests
     [Theory]
     [InlineData("FS01", true)]
     [InlineData("FS01.contoso.local", true)]
-    [InlineData("192.168.1.11", true)]
+    [InlineData("10.0.0.10", true)]
     [InlineData("FS 01", false)]
     public void Server(string v, bool ok) => Assert.Equal(ok, InputValidator.Server(v) is null);
 
