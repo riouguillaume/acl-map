@@ -1,0 +1,92 @@
+﻿ACL Map 1.0 — cartographie des droits NTFS et des partages
+=============================================================
+
+ACL Map montre qui a accès à quoi sur un serveur de fichiers, et pourquoi :
+groupes imbriqués, héritage, refus, droits de partage. Lecture seule par défaut.
+
+1. PRÉREQUIS
+------------
+- Windows 10/11 ou Windows Server 2016+ (x64).
+- Runtime Microsoft .NET 10 Desktop (x64) — vérifié par l'installateur :
+    winget install Microsoft.DotNet.DesktopRuntime.10
+- Microsoft Edge WebView2 (inclus dans Windows 10/11 ; absent de Windows Server) :
+  nécessaire pour l'interface uniquement. L'installateur prévient s'il manque.
+- Aucun module RSAT : ACL Map interroge l'annuaire (LDAP) et les serveurs (SMB) directement.
+
+Installation silencieuse :
+    msiexec /i AclMap-1.0.0.msi /qn
+Options : DESKTOPSHORTCUT=0 (sans raccourci bureau), SKIPDOTNETCHECK=1.
+
+2. PREMIER LANCEMENT
+--------------------
+L'assistant Quick Connect s'ouvre :
+  Bienvenue > Ce poste > Domaine > Serveurs de fichiers > Test > Terminé
+- Domaine : FQDN (contoso.local), contrôleur (DC01.contoso.local ; une IP est convertie en nom DNS).
+- Connexion : session Windows actuelle, ou autre compte du domaine (CONTOSO\audit) pour un poste
+  hors domaine. Le mot de passe est demandé dans une fenêtre Windows et gardé en mémoire
+  jusqu'à la fermeture d'ACL Map ; il n'est jamais enregistré.
+- Serveurs de fichiers : saisie, ou « Proposer depuis l'AD » ; « Partages… » pour garder des favoris.
+D'autres domaines s'ajoutent dans Paramètres > Domaines (ou « + Ajouter un domaine » en haut).
+
+Ports : vers le contrôleur 53 (DNS), 88 (Kerberos), 389 (LDAP) ; vers les serveurs de fichiers 445 (SMB).
+
+3. ANALYSER
+-----------
+Barre du haut : Domaine > Serveur > Partage > Chemin (ou « Parcourir… ») > Analyser.
+L'instantané (.aclmap) est enregistré dans le dossier du profil (défaut : Documents\AclMap).
+Double-cliquer sur un .aclmap l'ouvre dans ACL Map.
+
+Onglets :
+- Tableau de bord : indicateurs, constats par gravité, identités les plus présentes, partages.
+- Arborescence et ACL : ACE de chaque dossier (explicites/héritées, origine), « Qui a accès ? ».
+- Carte de droits : choisir un utilisateur ou un groupe ; l'arbre se colore selon son accès effectif
+  (NTFS seul ou via un partage : intersection des deux) ; graphe identité > groupes > dossiers ;
+  clic sur un dossier = explication ACE par ACE. « Vérifier avec Windows » compare avec l'API AuthZ.
+- Partages, Identités et groupes, Alertes (règles ACL-001 à ACL-040), Comparaison de deux
+  instantanés, Journal (opérations, erreurs de collecte, sauvegardes).
+Exports : rapport HTML, CSV (ACL, constats, partages, identités, carte de droits), JSON.
+
+Résultats « ambigus » : ACE conditionnelle, groupe dont les membres n'ont pas pu être lus
+(groupes locaux du serveur sans droits d'administrateur, groupe d'un autre domaine).
+Résultats « inconnus » : dossier illisible par le compte de collecte.
+
+Droits utiles : un compte standard lit la plupart des ACL et l'annuaire. Les droits de partage et
+les groupes locaux du serveur exigent d'être administrateur du serveur de fichiers.
+Mode sauvegarde (Paramètres > Analyse) : lit les dossiers verrouillés avec le privilège
+SeBackupPrivilege (Opérateurs de sauvegarde), SANS en prendre possession (pas de takeown).
+
+4. COLLECTEUR EN LIGNE DE COMMANDE (serveur de fichiers, tâche planifiée)
+------------------------------------------------------------------------
+Menu Démarrer > ACL Map > ACL Map – Collecteur (invite de commandes), ou :
+  "C:\Program Files\ACL Map\AclMap.Collector.exe" scan \\FS01\Donnees --out D:\Audits --depth 12
+  Options : --files  --parallel 8  --backup  --domain contoso.local  --dc DC01.contoso.local
+  Autres : shares FS01 | test --server FS01 | servers
+Le collecteur ne nécessite pas WebView2. Ouvrez ensuite le .aclmap produit dans l'interface.
+
+5. MODIFICATIONS CONTRÔLÉES
+---------------------------
+Désactivées par défaut. Paramètres > Modifications > « Autoriser les modifications ».
+- Ajouter un groupe sur un dossier (niveau, portée, autoriser/refuser), retirer une ACE explicite.
+- Ajouter/retirer un membre d'un groupe AD, créer un groupe.
+- Assistant AGDLP : GG_<Métier> > DL_<Partage>-<Dossier>_RW / _RO, imbrication, ACE, membres
+  (modèles de noms modifiables).
+Chaque modification : aperçu avant/après, objets touchés par la propagation, Dry Run (vérifie
+l'état réel sans rien écrire), confirmation (case + saisie APPLIQUER), refus si l'ACL a changé
+depuis l'analyse, sauvegarde de l'état précédent, relecture de contrôle, journal.
+Restauration : Journal > Sauvegardes et restauration.
+Compte délégué distinct recommandé (Paramètres > Domaines) : son mot de passe est redemandé à
+chaque application.
+
+6. FICHIERS
+-----------
+Paramètres          %APPDATA%\AclMap\settings.json (aucun secret)
+Journal             %LOCALAPPDATA%\AclMap\logs\aclmap-AAAAMMJJ.jsonl
+Plans / sauvegardes %LOCALAPPDATA%\AclMap\plans et \backups
+Instantanés         Documents\AclMap (ou dossier du profil) — données sensibles, diffusion restreinte.
+
+7. DÉPANNAGE
+------------
+- « Autre compte » : erreur 1058 = service « Ouverture de session secondaire » désactivé ;
+  1326 = identifiants ; 1219 = connexion SMB existante avec un autre compte (net use /delete).
+- Contrôleur injoignable : DNS du domaine, ports 53/88/389, heure synchronisée (moins de 5 min).
+- Interface blanche sur Windows Server : installer WebView2 (Evergreen) ou utiliser le collecteur.

@@ -1,0 +1,13 @@
+{\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fswiss Segoe UI;}}\viewkind4\uc1\pard\sa120\f0\fs16 \b CONDITIONS D'UTILISATION D'ACL MAP\b0\par 
+ACL Map est un outil interne de Dam-ITSECURITY destin\'e9 aux administrateurs syst\'e8me et s\'e9curit\'e9, pour cartographier, auditer et, lorsque c'est explicitement autoris\'e9, administrer les droits NTFS et de partage des serveurs de fichiers qu'ils sont autoris\'e9s \'e0 administrer.\par 
+\b 1. Usage autoris\'e9\b0\par 
+Utilisez ACL Map uniquement sur des environnements pour lesquels vous disposez d'une autorisation \'e9crite de l'entit\'e9 responsable (contrat d'infog\'e9rance, lettre de mission d'audit ou mandat interne).\par 
+\b 2. Lecture seule par d\'e9faut\b0\par 
+\'c0 l'installation, ACL Map ne modifie rien. Les modifications (ajout d'un groupe sur un dossier, membres de groupes, cr\'e9ation de groupes) ne sont possibles qu'apr\'e8s activation dans les Param\'e8tres, et chacune passe par un aper\'e7u avant/apr\'e8s, un Dry Run facultatif, une confirmation explicite, une sauvegarde de l'\'e9tat pr\'e9c\'e9dent et une entr\'e9e dans le journal. Vous restez responsable des modifications appliqu\'e9es.\par 
+\b 3. Moindre privil\'e8ge et secrets\b0\par 
+Un compte de lecture suffit pour l'analyse ; utilisez un compte d\'e9l\'e9gu\'e9 distinct pour les modifications. Aucun mot de passe n'est enregistr\'e9 : il est demand\'e9 dans une fen\'eatre Windows et conserv\'e9 en m\'e9moire au plus jusqu'\'e0 la fermeture de l'application (le compte de modification est redemand\'e9 \'e0 chaque application).\par 
+\b 4. Confidentialit\'e9 des donn\'e9es\b0\par 
+Les instantan\'e9s (.aclmap) et les exports d\'e9crivent l'organisation des droits du client : conservez-les sur un support prot\'e9g\'e9 et ne les diffusez pas hors de l'\'e9quipe habilit\'e9e.\par 
+\b 5. Garantie\b0\par 
+L'outil est fourni en l'\'e9tat. Les constats doivent \'eatre valid\'e9s par un administrateur qualifi\'e9 avant toute action. Les calculs d'acc\'e8s effectif marqu\'e9s \'ab ambigus \'bb doivent \'eatre v\'e9rifi\'e9s (onglet \'ab Acc\'e8s effectif \'bb de Windows ou bouton \'ab V\'e9rifier avec Windows \'bb).\par 
+}

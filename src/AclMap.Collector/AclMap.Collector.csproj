@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>AclMap.Collector</AssemblyName>
+    <RootNamespace>AclMap.Collector</RootNamespace>
+    <Description>Collecteur ACL Map (lecture seule, sauf verbe apply après confirmation)</Description>
+    <RollForward>LatestMajor</RollForward>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <DebugType>embedded</DebugType>
+    <SatelliteResourceLanguages>fr;en</SatelliteResourceLanguages>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AclMap.FileSystem\AclMap.FileSystem.csproj" />
+    <ProjectReference Include="..\AclMap.Shares\AclMap.Shares.csproj" />
+    <ProjectReference Include="..\AclMap.ActiveDirectory\AclMap.ActiveDirectory.csproj" />
+    <ProjectReference Include="..\AclMap.Operations\AclMap.Operations.csproj" />
+  </ItemGroup>
+</Project>

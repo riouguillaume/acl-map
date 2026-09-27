@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AclMap.Export\AclMap.Export.csproj" />
+    <ProjectReference Include="..\AclMap.Operations\AclMap.Operations.csproj" />
+    <ProjectReference Include="..\AclMap.Logging\AclMap.Logging.csproj" />
+  </ItemGroup>
+</Project>

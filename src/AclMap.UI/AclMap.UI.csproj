@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>AclMap</AssemblyName>
+    <RootNamespace>AclMap.UI</RootNamespace>
+    <ApplicationIcon>Assets\AclMap.ico</ApplicationIcon>
+    <Description>Cartographie et gestion contrôlée des ACL NTFS et des partages</Description>
+    <!-- Démarre aussi avec un runtime .NET plus récent (11, 12…) -->
+    <RollForward>LatestMajor</RollForward>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>embedded</DebugType>
+    <SatelliteResourceLanguages>fr;en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AclMap.Hosting\AclMap.Hosting.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Interface web embarquée, extraite au premier lancement dans %LOCALAPPDATA%\AclMap\app\<version> -->
+    <EmbeddedResource Include="Assets\Viewer\**\*" LogicalName="Viewer/$([System.String]::Copy('%(RecursiveDir)').Replace('\','/'))%(Filename)%(Extension)" />
+    <Resource Include="Assets\AclMap.ico" />
+  </ItemGroup>
+
+</Project>

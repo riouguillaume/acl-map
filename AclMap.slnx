@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AclMap.ACL/AclMap.ACL.csproj" />
+    <Project Path="src/AclMap.ActiveDirectory/AclMap.ActiveDirectory.csproj" />
+    <Project Path="src/AclMap.Collector/AclMap.Collector.csproj" />
+    <Project Path="src/AclMap.Core/AclMap.Core.csproj" />
+    <Project Path="src/AclMap.Export/AclMap.Export.csproj" />
+    <Project Path="src/AclMap.FileSystem/AclMap.FileSystem.csproj" />
+    <Project Path="src/AclMap.Hosting/AclMap.Hosting.csproj" />
+    <Project Path="src/AclMap.Logging/AclMap.Logging.csproj" />
+    <Project Path="src/AclMap.Models/AclMap.Models.csproj" />
+    <Project Path="src/AclMap.Operations/AclMap.Operations.csproj" />
+    <Project Path="src/AclMap.Services/AclMap.Services.csproj" />
+    <Project Path="src/AclMap.Shares/AclMap.Shares.csproj" />
+    <Project Path="src/AclMap.UI/AclMap.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AclMap.Testing/AclMap.Testing.csproj" />
+    <Project Path="tests/AclMap.Tests/AclMap.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/AclMap.DevHost/AclMap.DevHost.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,4 @@
+Signature_	Parent	Path	Depth
+s72	S72	S255	I2
+DrLocator	Signature_	Parent	Path
+NetDesktopFile		[ProgramFiles64Folder]dotnet\shared\Microsoft.WindowsDesktop.App	1

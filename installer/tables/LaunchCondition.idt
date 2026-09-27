@@ -1,0 +1,4 @@
+Condition	Description
+s255	l255
+LaunchCondition	Condition
+Installed OR DOTNETDESKTOP OR SKIPDOTNETCHECK	ACL Map nécessite le runtime Microsoft .NET 10 Desktop (x64). Installez-le puis relancez l'installation : winget install Microsoft.DotNet.DesktopRuntime.10 (ou https://dotnet.microsoft.com/download/dotnet/10.0).

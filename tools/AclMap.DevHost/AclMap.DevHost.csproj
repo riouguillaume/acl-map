@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Description>Hôte de développement : interface ACL Map dans un navigateur, avec collecteur et Windows simulés (tests automatisés).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AclMap.Hosting\AclMap.Hosting.csproj" />
+    <ProjectReference Include="..\..\tests\AclMap.Testing\AclMap.Testing.csproj" />
+  </ItemGroup>
+</Project>

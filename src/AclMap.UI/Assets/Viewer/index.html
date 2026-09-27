@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws://localhost:*; object-src 'none'; base-uri 'none'">
+<title>ACL Map</title>
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand" title="ACL Map">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="26" height="26" rx="7" fill="var(--accent)"/><path d="M10 11h5v4h-5zM17 17h5v4h-5zM10 21h5v-4" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M12.5 15v2M15 13h4.5v4" fill="none" stroke="#fff" stroke-width="2"/></svg>
+    <span>ACL Map</span>
+  </div>
+  <div class="pathbar" id="pathbar">
+    <label class="pb"><span>Domaine</span><select id="pbProfile" aria-label="Domaine actif"></select></label>
+    <label class="pb"><span>Serveur</span><select id="pbServer" aria-label="Serveur de fichiers"></select></label>
+    <label class="pb"><span>Partage</span><select id="pbShare" aria-label="Partage"></select></label>
+    <label class="pb grow"><span>Chemin à analyser</span><input id="pbPath" type="text" spellcheck="false" placeholder="\\FS01.contoso.local\Donnees" aria-label="Chemin à analyser"></label>
+    <button class="btn" id="pbBrowse" title="Parcourir les dossiers du partage">Parcourir…</button>
+    <button class="btn primary" id="pbScan">▶ Analyser</button>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn" id="btnOpen" title="Ouvrir un instantané .aclmap">Ouvrir</button>
+  <div class="menu">
+    <button class="btn" id="btnExport" disabled>Exporter ▾</button>
+    <div class="menu-list" id="exportMenu" hidden>
+      <button data-export="Html">Rapport HTML</button>
+      <button data-export="AclCsv">ACL de tous les dossiers (CSV)</button>
+      <button data-export="FindingsCsv">Constats (CSV)</button>
+      <button data-export="SharesCsv">Partages (CSV)</button>
+      <button data-export="PrincipalsCsv">Identités et groupes (CSV)</button>
+      <button data-export="Json">Instantané analysé (JSON)</button>
+    </div>
+  </div>
+  <span class="mode" id="modeBadge" title="Mode d'utilisation">Lecture seule</span>
+  <button class="btn icon" id="btnSettings" title="Paramètres" aria-label="Paramètres">⚙</button>
+</header>
+<nav class="tabs" id="tabs" role="tablist">
+  <button data-view="home" class="active">Tableau de bord</button>
+  <button data-view="tree">Arborescence et ACL</button>
+  <button data-view="map">Carte de droits</button>
+  <button data-view="shares">Partages <span class="count" id="cntShares"></span></button>
+  <button data-view="principals">Identités et groupes <span class="count" id="cntPrincipals"></span></button>
+  <button data-view="findings">Alertes <span class="count" id="cntFindings"></span></button>
+  <button data-view="diff">Comparaison</button>
+  <button data-view="journal">Journal</button>
+</nav>
+<main>
+  <section class="view active" id="view-home"></section>
+  <section class="view full" id="view-tree">
+    <div class="split">
+      <div class="pane left">
+        <div class="pane-tools">
+          <input type="search" id="treeSearch" placeholder="Rechercher un dossier…" aria-label="Rechercher un dossier">
+          <div class="chips" id="treeFilters">
+            <button class="chip" data-f="protected" title="Héritage désactivé">Héritage rompu</button>
+            <button class="chip" data-f="explicit" title="Dossiers portant des ACE explicites">ACE explicites</button>
+            <button class="chip" data-f="deny">Refus</button>
+            <button class="chip" data-f="orphan">SID orphelins</button>
+            <button class="chip" data-f="inaccessible">Inaccessibles</button>
+            <button class="chip" data-f="findings">Constats</button>
+          </div>
+        </div>
+        <div class="tree" id="tree" tabindex="0" role="tree" aria-label="Arborescence analysée"></div>
+        <div class="pane-foot muted small" id="treeFoot"></div>
+      </div>
+      <div class="pane right" id="folderPanel"><div class="empty">Sélectionnez un dossier pour afficher ses autorisations.</div></div>
+    </div>
+  </section>
+  <section class="view full" id="view-map">
+    <div class="maptools">
+      <div class="picker" id="mapPicker">
+        <input type="search" id="mapWho" placeholder="Utilisateur ou groupe…" autocomplete="off" aria-label="Identité à cartographier">
+        <div class="suggest" id="mapSuggest" hidden></div>
+      </div>
+      <label class="pb"><span>Chemin d'accès</span><select id="mapPath" aria-label="Chemin d'accès"></select></label>
+      <label class="check" id="mapImplicitWrap" hidden><input type="checkbox" id="mapImplicit"> SID implicites (Tout le monde…)</label>
+      <label class="check"><input type="checkbox" id="mapHideNone"> Masquer les dossiers sans accès</label>
+      <div class="spacer"></div>
+      <button class="btn small" id="mapExport" disabled>Exporter la carte (CSV)</button>
+    </div>
+    <div class="maphead" id="mapHead"></div>
+    <div class="split three">
+      <div class="pane left">
+        <div class="tree" id="mapTree" tabindex="0" role="tree" aria-label="Carte de droits"></div>
+        <div class="legendbar" id="mapLegend"></div>
+      </div>
+      <div class="pane right col">
+        <div class="graphwrap"><div id="cy"></div><div class="graphnote small muted" id="graphNote"></div></div>
+        <div class="explain" id="explainPanel"><div class="empty">Cliquez sur un dossier pour voir d'où vient le droit.</div></div>
+      </div>
+    </div>
+  </section>
+  <section class="view" id="view-shares"></section>
+  <section class="view full" id="view-principals">
+    <div class="split">
+      <div class="pane left">
+        <div class="pane-tools">
+          <input type="search" id="prSearch" placeholder="Rechercher une identité…" aria-label="Rechercher une identité">
+          <div class="chips" id="prFilters">
+            <button class="chip on" data-k="all">Toutes</button>
+            <button class="chip" data-k="User">Utilisateurs</button>
+            <button class="chip" data-k="Group">Groupes AD</button>
+            <button class="chip" data-k="LocalGroup">Groupes locaux</button>
+            <button class="chip" data-k="WellKnown">Bien connus</button>
+            <button class="chip" data-k="acl">Dans les ACL</button>
+            <button class="chip" data-k="priv">Privilégiés</button>
+            <button class="chip" data-k="orphan">Orphelins</button>
+          </div>
+        </div>
+        <div class="list scroll" id="prList"></div>
+      </div>
+      <div class="pane right" id="principalPanel"><div class="empty">Sélectionnez une identité.</div></div>
+    </div>
+  </section>
+  <section class="view" id="view-findings"></section>
+  <section class="view" id="view-diff"></section>
+  <section class="view" id="view-journal"></section>
+</main>
+<div id="modalRoot"></div>
+<div id="toasts" aria-live="polite"></div>
+<script src="js/cytoscape.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/tree.js"></script>
+<script src="js/home.js"></script>
+<script src="js/views.js"></script>
+<script src="js/map.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/write.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

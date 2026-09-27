@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Installateur Windows (MSI) d'ACL Map.
+  - Installation pour tous les utilisateurs : C:\Program Files\ACL Map (droits administrateur).
+  - AclMap.exe (interface) et AclMap.Collector.exe (collecteur, utilisable seul en ligne de commande).
+  - Raccourcis menu Démarrer (application + invite du collecteur) et bureau, association .aclmap.
+  - Mise à niveau automatique (MajorUpgrade) ; paramètres, instantanés, journaux et sauvegardes conservés.
+  - Prérequis bloquant : runtime .NET 10 Desktop x64 (ou plus récent). WebView2 : vérifié, avertissement non bloquant
+    (un serveur de fichiers sans WebView2 peut utiliser le collecteur seul).
+  Construction : installer/build-msi.sh (wixl + msibuild, msitools). Déploiement silencieux : msiexec /i AclMap-1.0.0.msi /qn
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="ACL Map" Language="1036" Codepage="1252" Version="$(var.Version)"
+           Manufacturer="Dam-ITSECURITY" UpgradeCode="FFABCB3B-039B-4DC8-B863-2DCEBA1A4258">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" SummaryCodepage="1252"
+             Languages="1036" Description="ACL Map $(var.Version) – cartographie des droits NTFS et des partages"
+             Comments="Outil interne Dam-ITSECURITY. Lecture seule par défaut." Manufacturer="Dam-ITSECURITY" />
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="Une version plus récente d'ACL Map est déjà installée. Désinstallez-la d'abord si vous voulez revenir à cette version." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AclMapIcon" SourceFile="$(var.Source)/AclMap.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AclMapIcon" />
+    <Property Id="ARPCOMMENTS" Value="Cartographie des droits NTFS et des partages ; modifications contrôlées (aperçu, Dry Run, confirmation, sauvegarde)." />
+    <Property Id="ARPCONTACT" Value="Dam-ITSECURITY" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLDIR" Name="ACL Map">
+          <Component Id="MainExe" Guid="C5AB5153-3AC7-4D29-99ED-0586930B7747" Win64="yes">
+            <File Id="AclMapExe" Name="AclMap.exe" Source="$(var.Source)/AclMap.exe" KeyPath="yes" />
+            <RegistryValue Root="HKLM" Key="Software\Classes\.aclmap" Type="string" Value="AclMap.Snapshot" />
+            <RegistryValue Root="HKLM" Key="Software\Classes\.aclmap" Name="Content Type" Type="string" Value="application/x-aclmap" />
+            <RegistryValue Root="HKLM" Key="Software\Classes\AclMap.Snapshot" Type="string" Value="Instantané ACL Map" />
+            <RegistryValue Root="HKLM" Key="Software\Classes\AclMap.Snapshot\DefaultIcon" Type="string" Value="&quot;[INSTALLDIR]AclMap.exe&quot;,0" />
+            <RegistryValue Root="HKLM" Key="Software\Classes\AclMap.Snapshot\shell\open" Type="string" Value="Ouvrir avec ACL Map" />
+            <RegistryValue Root="HKLM" Key="Software\Classes\AclMap.Snapshot\shell\open\command" Type="string" Value="&quot;[INSTALLDIR]AclMap.exe&quot; &quot;%1&quot;" />
+          </Component>
+          <Component Id="CollectorExe" Guid="23929CA9-5241-4078-AD8A-FC16C24CF452" Win64="yes">
+            <File Id="AclMapCollectorExe" Name="AclMap.Collector.exe" Source="$(var.Source)/AclMap.Collector.exe" KeyPath="yes" />
+          </Component>
+          <Component Id="Readme" Guid="21A701D2-A7C7-4687-AD39-A40A9F97E61F" Win64="yes">
+            <File Id="LisezMoi" Name="LISEZMOI.txt" Source="$(var.Source)/LISEZMOI.txt" KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="AclMapMenu" Name="ACL Map">
+          <Component Id="StartMenuShortcuts" Guid="44779560-BD7F-451A-A82E-AEF71B3D0C46">
+            <Shortcut Id="StartMenuAclMap" Name="ACL Map" Description="Cartographie des droits NTFS et des partages"
+                      Target="[INSTALLDIR]AclMap.exe" WorkingDirectory="INSTALLDIR" />
+            <Shortcut Id="StartMenuCollector" Name="ACL Map - Collecteur (invite de commandes)" Description="Collecteur en ligne de commande (serveur de fichiers, tâche planifiée)"
+                      Target="[SystemFolder]cmd.exe" Arguments="/k &quot;&quot;[INSTALLDIR]AclMap.Collector.exe&quot; help&quot;" WorkingDirectory="INSTALLDIR" />
+            <Shortcut Id="StartMenuReadme" Name="ACL Map - Lisez-moi" Target="[INSTALLDIR]LISEZMOI.txt" WorkingDirectory="INSTALLDIR" />
+            <RemoveFolder Id="RemoveAclMapMenu" On="uninstall" />
+            <RegistryValue Root="HKLM" Key="Software\Dam-ITSECURITY\ACL Map" Name="StartMenuShortcuts" Type="integer" Value="1" KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+      <Directory Id="DesktopFolder">
+        <Component Id="DesktopShortcut" Guid="7672FAD4-0EAC-46D9-9306-636913DA8518">
+          <Shortcut Id="DesktopAclMap" Name="ACL Map" Description="Cartographie des droits NTFS et des partages"
+                    Target="[INSTALLDIR]AclMap.exe" WorkingDirectory="INSTALLDIR" />
+          <RegistryValue Root="HKLM" Key="Software\Dam-ITSECURITY\ACL Map" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </Directory>
+
+    <!-- Raccourci bureau par défaut ; msiexec ... DESKTOPSHORTCUT=0 pour ne pas le créer (condition ajoutée par build-msi.sh) -->
+    <Property Id="DESKTOPSHORTCUT" Value="1" />
+
+    <Feature Id="Complete" Title="ACL Map" Level="1">
+      <ComponentRef Id="MainExe" />
+      <ComponentRef Id="CollectorExe" />
+      <ComponentRef Id="Readme" />
+      <ComponentRef Id="StartMenuShortcuts" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <UIRef Id="WixUI_Minimal" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Lancer ACL Map (l'assistant Quick Connect s'ouvre au premier démarrage)" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <!-- Recherche .NET / WebView2, avertissement WebView2 et lancement en fin d'installation : tables ajoutées par build-msi.sh -->
+  </Product>
+</Wix>
